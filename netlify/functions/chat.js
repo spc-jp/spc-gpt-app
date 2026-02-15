@@ -1,13 +1,8 @@
-exports.handler = async (event) => {
-try {
-const body = JSON.parse(event.body || "{}");
-const userText = body.text || "こんにちは。";
-
 const apiKey = process.env.OPENAI_API_KEY;
 if (!apiKey) {
   return {
     statusCode: 500,
-    body: JSON.stringify({ error: "OPENAI_API_KEY が未設定です" })
+    body: JSON.stringify({ text: "エラー：OPENAI_API_KEYが未設定です" }),
   };
 }
 
@@ -15,28 +10,36 @@ const res = await fetch("https://api.openai.com/v1/responses", {
   method: "POST",
   headers: {
     "Authorization": `Bearer ${apiKey}`,
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
   },
   body: JSON.stringify({
     model: "gpt-4.1-mini",
-    input: userText
-  })
+    input: userText,
+  }),
 });
 
 const data = await res.json();
 
+let text =
+  data.output_text ||
+  (Array.isArray(data.output) &&
+    data.output[0] &&
+    Array.isArray(data.output[0].content) &&
+    data.output[0].content[0] &&
+    data.output[0].content[0].text) ||
+  "";
+
+if (!res.ok) {
+  const msg = data.error && data.error.message ? data.error.message : "APIエラー";
+  return {
+    statusCode: res.status,
+    body: JSON.stringify({ text: `エラー：${msg}` }),
+  };
+}
+
+if (!text) text = "（返答が空でした）";
+
 return {
   statusCode: 200,
-  body: JSON.stringify({
-    text: data.output_text || "(返答が取得できませんでした)"
-  })
-};
-
-
-} catch (e) {
-return {
-statusCode: 500,
-body: JSON.stringify({ error: String(e) })
-};
-}
+  body: JSON.stringify({ text }),
 };
