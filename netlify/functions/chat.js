@@ -28,52 +28,52 @@ const body = event.body ? JSON.parse(event.body) : {};
 const userText = (body.text || "").toString().trim();
 
 if (!userText) {
-  return {
-    statusCode: 400,
-    headers: corsHeaders,
-    body: JSON.stringify({ text: "入力が空です" }),
-  };
+return {
+statusCode: 400,
+headers: corsHeaders,
+body: JSON.stringify({ text: "入力が空です" }),
+};
 }
 
-const res = await fetch("https://api.openai.com/v1/responses", {
-  method: "POST",
-  headers: {
-    "Authorization": `Bearer ${apiKey}`,
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    model: "gpt-4.1-mini",
-    input: userText,
-  }),
+const res = await fetch("https://api.openai.com/v1/responses
+", {
+method: "POST",
+headers: {
+"Authorization": Bearer ${apiKey},
+"Content-Type": "application/json",
+},
+body: JSON.stringify({
+model: "gpt-4.1-mini",
+input: userText,
+}),
 });
 
 const data = await res.json();
 
 if (!res.ok) {
-  const msg =
-    (data && data.error && data.error.message) ? data.error.message : "APIエラー";
-  return {
-    statusCode: res.status,
-    headers: corsHeaders,
-    body: JSON.stringify({ text: `エラー：${msg}` }),
-  };
+const msg =
+(data && data.error && data.error.message) ? data.error.message : "APIエラー";
+return {
+statusCode: res.status,
+headers: corsHeaders,
+body: JSON.stringify({ text: エラー：${msg} }),
+};
 }
 
 const text =
-  data.output_text ||
-  (Array.isArray(data.output) &&
-    data.output[0] &&
-    Array.isArray(data.output[0].content) &&
-    data.output[0].content[0] &&
-    (data.output[0].content[0].text || data.output[0].content[0].value)) ||
-  "";
+data.output_text ||
+(Array.isArray(data.output) &&
+data.output[0] &&
+Array.isArray(data.output[0].content) &&
+data.output[0].content[0] &&
+(data.output[0].content[0].text || data.output[0].content[0].value)) ||
+"";
 
 return {
-  statusCode: 200,
-  headers: corsHeaders,
-  body: JSON.stringify({ text: text || "返答が空でした" }),
+statusCode: 200,
+headers: corsHeaders,
+body: JSON.stringify({ text: text || "返答が空でした" }),
 };
-
 
 } catch (e) {
 return {
